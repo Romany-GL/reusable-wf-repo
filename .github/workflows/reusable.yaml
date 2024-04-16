@@ -1,0 +1,51 @@
+name: reusable-workflow
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        default: Romany
+        required: true
+        description: Config path
+    secrets:
+      custom-token:
+        description: custom token defined in the repo
+        required: true
+    outputs:
+      firstName:
+        value: ${{jobs.generate-outputs.outputs.output1}}
+      lastName:
+        value: ${{jobs.generate-outputs.outputs.output2}}
+
+jobs:
+  checkout-reusable-wf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: display repo files
+        run: ls -a
+
+  log-context-and-inputs-reusable-wf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: log context
+        run: echo '${{toJson(github)}}'
+
+      - name: log inputs
+        run: echo 'Inputs from repo:::>>>' ${{inputs.name}}
+
+      - name: log secrets
+        run: echo "${{secrets.custom-token}}"
+
+  generate-outputs:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{steps.generate-output.outputs.firstName}}
+      output2: ${{steps.generate-output.outputs.lastName}}
+    steps:
+      - name: add outputs to GITHUB_OUTPUT
+        id: generate-output
+        run: |
+          echo "firstName=Romany" >> $GITHUB_OUTPUT
+          echo "lastName=SEFEN" >> $GITHUB_OUTPUT
